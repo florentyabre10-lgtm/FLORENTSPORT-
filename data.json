@@ -1,0 +1,22 @@
+{
+  "matchs_du_jour": {
+    "1001": {
+      "fixture": { "id": 1001, "date": "2026-09-29T20:00:00Z", "status": { "short": "1H", "elapsed": 35 } },
+      "league": { "id": 2, "name": "UEFA Champions League", "country": "World", "logo": "https://media.api-sports.io/football/leagues/2.png" },
+      "teams": {
+        "home": { "name": "Real Madrid", "logo": "https://media.api-sports.io/football/teams/541.png" },
+        "away": { "name": "FC Barcelone", "logo": "https://media.api-sports.io/football/teams/529.png" }
+      },
+      "goals": { "home": 2, "away": 1 }
+    },
+    "1002": {
+      "fixture": { "id": 1002, "date": "2026-09-29T21:00:00Z", "status": { "short": "NS", "elapsed": null } },
+      "league": { "id": 61, "name": "Ligue 1", "country": "France", "logo": "https://media.api-sports.io/football/leagues/61.png" },
+      "teams": {
+        "home": { "name": "PSG", "logo": "https://media.api-sports.io/football/teams/85.png" },
+        "away": { "name": "Marseille", "logo": "https://media.api-sports.io/football/teams/81.png" }
+      },
+      "goals": { "home": 0, "away": 0 }
+    }
+  }
+}
