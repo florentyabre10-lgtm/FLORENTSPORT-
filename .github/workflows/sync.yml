@@ -3,7 +3,7 @@ name: Automatique Matchs Sync
 on:
   workflow_dispatch:
   schedule:
-    # S'exécute à chaque heure, de 6h à 23h (minuit)
+    # S'exécute à chaque heure, de 6h à 23h
     - cron: '0 6-23 * * *'
 
 jobs:
@@ -19,7 +19,7 @@ jobs:
           node-version: '18'
 
       - name: Installer les dépendances
-        run: npm install node-fetch
+        run: npm install node-fetch@2
 
       - name: Lancer le script de mise à jour
         env:
