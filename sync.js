@@ -1,36 +1,57 @@
-import fetch from 'node-fetch';
-import { initializeApp } from 'firebase/app';
-import { getDatabase, ref, set } from 'firebase/database';
+// Importation compatible Node.js CommonJS
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+const admin = require('firebase-admin');
 
-const firebaseConfig = {
-    databaseURL: "https://florentsport-default-rtdb.firebaseio.com"
-};
+// Initialisation de Firebase avec les secrets GitHub / variables d'environnement
+const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const API_KEY = process.env.API_KEY_SPORTS;
-
-async function synchroniser() {
-    try {
-        const response = await fetch('https://v3.football.api-sports.io/fixtures?live=all', {
-            headers: { 'x-apisports-key': API_KEY }
-        });
-        const result = await response.json();
-
-        if (result.response && result.response.length > 0) {
-            const dataToSave = {};
-            result.response.forEach(m => {
-                dataToSave[m.fixture.id] = m;
-            });
-            await set(ref(db, 'matchs_du_jour'), dataToSave);
-            console.log('Firebase mis à jour avec succès !');
-        } else {
-            console.log('Aucun match en direct actuellement.');
-        }
-    } catch (err) {
-        console.error('Erreur lors de la synchronisation:', err);
-    }
-    process.exit(0);
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    databaseURL: process.env.FIREBASE_DATABASE_URL
+  });
 }
 
-synchroniser();
+const db = admin.database();
+
+// Fonction principale de synchronisation
+async function syncSportsData() {
+  console.log("🚀 Début de la synchronisation avec API-Sports...");
+
+  try {
+    // 1. Récupération des données depuis API-Football
+    const response = await fetch("https://v3.football.api-sports.io/fixtures?live=all", {
+      method: "GET",
+      headers: {
+        "x-rapidapi-key": process.env.FOOTBALL_API_KEY,
+        "x-rapidapi-host": "v3.football.api-sports.io"
+      }
+    });
+
+    const data = await response.json();
+
+    if (data.errors && Object.keys(data.errors).length > 0) {
+      console.error("❌ Erreur retournée par l'API :", data.errors);
+      process.exit(1);
+    }
+
+    console.log(`✅ ${data.results} matchs récupérés de l'API.`);
+
+    // 2. Enregistrement des données dans Firebase Realtime Database
+    const ref = db.ref("live_matches");
+    await ref.set({
+      last_updated: new Date().toISOString(),
+      fixtures: data.response || []
+    });
+
+    console.log("🔥 Données synchronisées avec succès dans Firebase !");
+    process.exit(0);
+
+  } catch (error) {
+    console.error("❌ Erreur pendant la synchronisation :", error);
+    process.exit(1);
+  }
+}
+
+// Lancement de la fonction
+syncSportsData();
