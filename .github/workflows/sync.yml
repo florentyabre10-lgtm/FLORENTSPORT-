@@ -1,29 +1,28 @@
 name: Automatique Matchs Sync
 
 on:
+  workflow_dispatch:
   schedule:
-    - cron: '0 0 * * *' # Exécution automatique tous les jours à 00:00 UTC
-  workflow_dispatch:     # Permet le déclenchement manuel
+    # S'exécute à chaque heure, de 6h à 23h (minuit)
+    - cron: '0 6-23 * * *'
 
 jobs:
   sync:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Récupération du code
-        uses: actions/checkout@v3
+      - name: Récupérer le code du dépôt
+        uses: actions/checkout@v4
 
-      - name: Configuration de Node.js
-        uses: actions/setup-node@v3
+      - name: Configurer Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: '18'
 
-      - name: Installation des dépendances
-        run: npm install firebase-admin node-fetch@2
+      - name: Installer les dépendances
+        run: npm install node-fetch
 
-      - name: Exécution de la synchronisation
+      - name: Lancer le script de mise à jour
         env:
-          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          FIREBASE_DATABASE_URL: ${{ secrets.FIREBASE_DATABASE_URL }}
           FOOTBALL_API_KEY: ${{ secrets.FOOTBALL_API_KEY }}
-        run: node sync.js
+          FIREBASE_DATABASE_URL: ${{ secrets.FIREBASE_DATABASE_URL }}
+        run: node scripts/update.js
